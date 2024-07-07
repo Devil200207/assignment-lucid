@@ -8,7 +8,7 @@ import './App.css'
 function App() {
   const [socket, setSocket] = useState(null);
   useEffect(() => {
-    const newsocit = io('http://localhost:3000', {transports: ['websocket', 'polling', 'flashsocket']});
+    const newsocit = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
 
     setSocket(newsocit);
     newsocit.on('connect', () => {
