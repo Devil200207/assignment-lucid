@@ -18,7 +18,7 @@ function Dashboard() {
             const token = localStorage.getItem('token'); // Assuming you have a token stored in localStorage
             const userId = localStorage.getItem('userId'); // Assuming you have userId stored in localStorage
 
-            const response = await axios.get('http://localhost:3000/api/tasks', {
+            const response = await axios.get('https://assignment-lucid.onrender.com/api/tasks', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 },
@@ -49,7 +49,7 @@ function Dashboard() {
     const handleDeleteTask = async (taskId) => {
       try {
           const token = localStorage.getItem('token');
-          await axios.delete(`http://localhost:3000/api/tasks/${taskId}`, {
+          await axios.delete(`https://assignment-lucid.onrender.com/api/tasks/${taskId}`, {
               headers: {
                   Authorization: `Bearer ${token}`
               }
@@ -65,7 +65,7 @@ function Dashboard() {
   const handleChangePriority = async (taskId, newPriority) => {
       try {
           const token = localStorage.getItem('token');
-          await axios.put(`http://localhost:3000/api/tasks/${taskId}`, { priority: newPriority }, {
+          await axios.put(`https://assignment-lucid.onrender.com/api/tasks/${taskId}`, { priority: newPriority }, {
               headers: {
                   Authorization: `Bearer ${token}`
               }
@@ -81,7 +81,7 @@ function Dashboard() {
   const handleChangeStatus = async (taskId, newStatus) => {
       try {
           const token = localStorage.getItem('token');
-          await axios.put(`http://localhost:3000/api/tasks/${taskId}`, { status: newStatus }, {
+          await axios.put(`https://assignment-lucid.onrender.com/api/tasks/${taskId}`, { status: newStatus }, {
               headers: {
                   Authorization: `Bearer ${token}`
               }

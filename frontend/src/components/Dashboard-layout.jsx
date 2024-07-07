@@ -24,7 +24,7 @@ export default function DashboardLayout() {
                     email: user.primaryEmailAddress.emailAddress,
                 };
                 try {
-                    const response = await axios.post("http://localhost:3000/api/auth/register", userData);
+                    const response = await axios.post("https://assignment-lucid.onrender.com/api/auth/register", userData);
                     const { token } = response.data;
                     localStorage.setItem("token", token); // Store the token in local storage
                 } catch (error) {
