@@ -13,7 +13,7 @@ function Dashboard() {
 
     useEffect(() => {
         fetchTasks();
-    }, []);
+    }, [tasks]);
 
     const fetchTasks = async () => {
         try {
