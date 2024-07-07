@@ -4,7 +4,8 @@ import io from 'socket.io-client';
 import AuthPage from "./components/AuthPage";
 import DashboardLayout from "./components/Dashboard-layout";
 import './App.css'
-import { toast} from 'react-toastify';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [socket, setSocket] = useState(null);
@@ -27,12 +28,16 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
+   <div>
+     <BrowserRouter>
       <Routes>
         <Route path="/" element={<AuthPage />}/> 
         <Route path="/dashboard" element={<DashboardLayout socket={socket} />} />
+        
       </Routes>
     </BrowserRouter>
+    <ToastContainer />
+   </div>
   )
 }
 
