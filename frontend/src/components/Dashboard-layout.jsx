@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Dashboard from "./Dashboard";
 import Register from "./Register";
+import { WavyBackground } from './ui/wavy-background';
 
 export default function DashboardLayout() {
     const { userId, isLoaded } = useAuth();
@@ -39,9 +40,14 @@ export default function DashboardLayout() {
     if (!isLoaded) return "Loading...";
 
     return (
-        <div>
-            <Register />
+        <WavyBackground>
+            <div className="p-8">
+                <Register/>
+            </div>
             <Dashboard />
-        </div>
+        </WavyBackground>
+        
+            
+        
     );
 }
