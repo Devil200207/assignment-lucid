@@ -127,7 +127,7 @@ function Dashboard() {
                 }
             );
             // fetchTasks();
-            setchange((pre) => {!pre});
+            setchange(!chnage);
             toast.success("Status changed successfully!");
         } catch (error) {
             console.error("Error changing status:", error);
