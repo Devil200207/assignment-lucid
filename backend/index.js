@@ -13,7 +13,7 @@ const io = new Server(server, {
       origin: "*",
       methods: ["GET", "POST"],
     },
-  });
+});
 
 
 app.use(express.json());
@@ -22,11 +22,37 @@ app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 
-io.on('connection', (socket) => {
-    console.log('New client connected');
-    socket.on('disconnect', () => {
-      console.log('Client disconnected');
+// io.on('connection', (socket) => {
+//     console.log('New client connected');
+//     socket.on('disconnect', () => {
+//       console.log('Client disconnected');
+//     });
+// });
+
+const users = [];
+
+io.on("connection", (socket) => {
+    // console.log(`User connected with ${socket.id}`);
+
+    // socket.broadcast.emit('hi',"how are you");
+
+    
+
+    socket.on("join_room", (data) => {
+      socket.join(data);
+      console.log(`User with id ${socket.id} joined room : ${data}`);
     });
+
+    socket.on('assignTask', ({ task, toUserId, fromUserId }) => {
+      // Send task to the assigned user
+      console.log(task, toUserId, fromUserId);
+      // socket.join(toUserId);
+      socket.to(fromUserId).emit('assignTask', task);
+  
+      // Re-join the sender's room
+      // socket.join(fromUserId);
+    });
+
 });
 
 server.listen(3000, () => {

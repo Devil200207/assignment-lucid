@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import TaskForm from "./TaskForm";
 import { toast, ToastContainer } from "react-toastify";
@@ -6,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Meteors } from "./ui/meteors";
 import { AnimatePresence, motion } from "framer-motion";
 import io from 'socket.io-client';
-const socket = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
+// const socket = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
 
 function Dashboard() {
     const [tasks, setTasks] = useState([]);
@@ -16,49 +17,93 @@ function Dashboard() {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [priorityFilter, setPriorityFilter] = useState("");
+    // const [socket, setSocket] = useState(null);
+    const socket = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
+    const { user } = useUser();
+
+  useEffect(() => {
+    // const newsocit = io('http://localhost:3000', {transports: ['websocket', 'polling', 'flashsocket']});
+
+  if(socket)
+  {
+    let userId = localStorage.getItem("userId");
+    if(!userId)
+    {
+        localStorage.setItem("userId",user.id);
+        userId = localStorage.getItem("userId"); 
+    }
+    
+    console.log(userId);
+    // setSocket(newsocit);
+    socket.on('connect', () => {
+        socket.emit('join_room',userId)
+    });
+
+    
+
+    // newsocit.on('hi', (data) => {
+        socket.emit('gg',"testing")
+    // });
+
+    socket.on('assignTask', (task) => {
+        console.log(task);
+        setTasks((prevTasks) => [...prevTasks, task]);
+        alert(`New task assigned: ${task.name}`);
+    });
+  
+  }
+    // return () => {
+    //     socket.disconnect();
+    // };
+  }, [showForm]);
 
     useEffect(() => {
         fetchTasks();
-        setUpSocketListeners();
+        // setUpSocketListeners();
+
+        const userId = localStorage.getItem("userId");
 
         
-    }, [tasks]);
+    }, []);
 
     useEffect(() => {
         applyFilters();
-    }, [tasks,statusFilter, priorityFilter]);
+    }, [statusFilter, priorityFilter]);
 
-    const setUpSocketListeners = () => {
-        socket.on('taskCreated', (newTask) => {
-            console.log('New task created:', newTask);
-            const userId = localStorage.getItem("userId");
-            if (newTask.createdBy === userId || newTask.assignedTo.includes(userId)) {
-                toast.success('New task assigned to you!');
-                setTasks(prevTasks => sortTasksByPriority([...prevTasks, newTask]));
-            }
-        });
+    // const setUpSocketListeners = () => {
+    //     console.log("hiii")
+    //     socket.on('taskCreated', (newTask) => {
+    //         console.log('New task created:', newTask);
+    //         const userId = localStorage.getItem("userId");
+    //         if (newTask.createdBy === userId || newTask.assignedTo.includes(userId)) {
+    //             toast.success('New task assigned to you!');
+    //             setTasks(prevTasks => sortTasksByPriority([...prevTasks, newTask]));
+    //         }
+    //     });
 
-        socket.on('taskUpdated', (updatedTask) => {
-            setTasks(prevTasks => prevTasks.map(task => task._id === updatedTask._id ? updatedTask : task));
-            toast.success('Task updated!');
-        });
+    //     socket.on('taskUpdated', (updatedTask) => {
+    //         setTasks(prevTasks => prevTasks.map(task => task._id === updatedTask._id ? updatedTask : task));
+    //         toast.success('Task updated!');
+    //     });
 
-        socket.on('taskDeleted', ({ taskId }) => {
-            setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
-            toast.success('Task deleted!');
-        });
-    };
+    //     socket.on('taskDeleted', ({ taskId }) => {
+    //         setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
+    //         toast.success('Task deleted!');
+    //     });
+    // };
 
-    const cleanUpSocketListeners = () => {
-        socket.off('taskCreated');
-        socket.off('taskUpdated');
-        socket.off('taskDeleted');
-    };
+    // const cleanUpSocketListeners = () => {
+    //     socket.off('taskCreated');
+    //     socket.off('taskUpdated');
+    //     socket.off('taskDeleted');
+    // };
 
     const fetchTasks = async () => {
         try {
             const token = localStorage.getItem("token");
             const userId = localStorage.getItem("userId");
+
+            // console.log( socket.on('taskCreated'));
 
             const response = await axios.get(
                 "https://assignment-lucid.onrender.com/api/tasks",
@@ -74,7 +119,7 @@ function Dashboard() {
 
             const sortedTasks = sortTasksByPriority(response.data);
             setTasks(sortedTasks);
-            setUpSocketListeners();
+            // setUpSocketListeners();
             setLoading(false);
         } catch (error) {
             console.error("Error fetching tasks:", error);
@@ -83,12 +128,18 @@ function Dashboard() {
     };
 
     const handleSaveTask = (savedTask) => {
+        console.log(savedTask);
+        socket.emit('join_room',savedTask.assignedTo[0]);
+        socket.emit('assignTask',{task:savedTask,toUserId:savedTask.createdBy,fromUserId:savedTask.assignedTo[0]})
+        
         const updatedTasks = [...tasks, savedTask];
         const sortedTasks = sortTasksByPriority(updatedTasks);
-        setUpSocketListeners();
+        // setUpSocketListeners();
         setTasks(sortedTasks);
         setShowForm(false);
         toast.success("Task added successfully!");
+
+        socket.emit('join_room',savedTask.createdBy);
     };
 
     const handleDeleteTask = async (taskId) => {

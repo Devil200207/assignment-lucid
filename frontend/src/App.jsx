@@ -8,31 +8,25 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  const [socket, setSocket] = useState(null);
-  useEffect(() => {
-    const newsocit = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
+  // const [socket, setSocket] = useState(null);
+  // useEffect(() => {
+  //   const newsocit = io('http://localhost:3000', {transports: ['websocket', 'polling', 'flashsocket']});
 
-    setSocket(newsocit);
-    newsocit.on('connect', () => {
-      console.log('Connected to server');
-    });
-
-    newsocit.on('taskCreated', (task) => {
-      console.log('New task created:', task);
-      toast.success('New task assigned to you!');
-    });
   
-    // return () => {
-    //   newsocit.disconnect();
-    // };
-  }, []);
+
+  //   setSocket(newsocit);
+  //   newsocit.on('connect', () => {
+  //     console.log('Connected to server');
+  //   });
+
+  // }, []);
 
   return (
    <div>
      <BrowserRouter>
       <Routes>
         <Route path="/" element={<AuthPage />}/> 
-        <Route path="/dashboard" element={<DashboardLayout socket={socket} />} />
+        <Route path="/dashboard" element={<DashboardLayout />} />
         
       </Routes>
     </BrowserRouter>

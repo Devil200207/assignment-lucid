@@ -1,18 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const app = express();
-const http = require("http");
-const cors = require("cors");
-const { Server } = require("socket.io");
 const {Task} = require("../batabase/db");
-const server = http.createServer(app);
 
-const io = new Server(server, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST","PUT","DELETE"],
-    },
-  });
+
 
 //Create Task
 router.post('/saveTask', async (req, res) => {
@@ -30,7 +20,7 @@ router.post('/saveTask', async (req, res) => {
         name
         });
         // io.emit('taskCreated', task);
-        io.emit('taskCreated', task);
+       
         
         res.status(201).json(task);
     }
@@ -62,7 +52,7 @@ router.put('/:id', async (req, res) => {
     try
     {
         const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        io.emit('taskUpdated', task);
+        // io.emit('taskUpdated', task);
         res.status(200).json(task);
     }
     catch
@@ -76,7 +66,7 @@ router.delete('/:id', async (req, res) => {
     try
     {
         await Task.findByIdAndDelete(req.params.id);
-        io.emit('taskDeleted', { taskId: req.params.id });
+        // io.emit('taskDeleted', { taskId: req.params.id });
         res.status(204).send();
     }
     catch
