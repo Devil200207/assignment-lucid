@@ -12,6 +12,7 @@ function Dashboard() {
     const [tasks, setTasks] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [chnage, setchange] = useState(true);
 
     useEffect(() => {
         fetchTasks();
@@ -25,7 +26,7 @@ function Dashboard() {
             socket.off('taskCreated');
         };
         
-    }, [tasks]);
+    }, [chnage]);
 
     const fetchTasks = async () => {
         try {
@@ -47,6 +48,7 @@ function Dashboard() {
             const sortedTasks = sortTasksByPriority(response.data);
             setTasks(sortedTasks);
             setLoading(false);
+            // setchange((pre) => {!pre});
         } catch (error) {
             console.error("Error fetching tasks:", error);
             setLoading(false);
@@ -67,6 +69,7 @@ function Dashboard() {
         setTasks([...tasks, savedTask]);
         setShowForm(false);
         console.log(savedTask);
+        setchange((pre) => {!pre});
         toast.success("Task added successfully!");
     };
 
@@ -81,7 +84,8 @@ function Dashboard() {
                     },
                 }
             );
-            fetchTasks();
+            // fetchTasks();
+            setchange((pre) => {!pre});
             toast.success("Task deleted successfully!");
         } catch (error) {
             console.error("Error deleting task:", error);
@@ -101,7 +105,8 @@ function Dashboard() {
                     },
                 }
             );
-            fetchTasks();
+            // fetchTasks();
+            setchange((pre) => {!pre});
             toast.success("Priority changed successfully!");
         } catch (error) {
             console.error("Error changing priority:", error);
@@ -121,7 +126,8 @@ function Dashboard() {
                     },
                 }
             );
-            fetchTasks();
+            // fetchTasks();
+            setchange((pre) => {!pre});
             toast.success("Status changed successfully!");
         } catch (error) {
             console.error("Error changing status:", error);
