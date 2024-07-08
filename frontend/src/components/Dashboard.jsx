@@ -13,29 +13,23 @@ function Dashboard() {
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // useEffect(() => {
-        
-    //         fetchTasks();
-
-
-    //     socket.on('taskCreated', (newTask) => {
-    //         console.log('New task created:', newTask);
-    //         const userId = localStorage.getItem("userId");
-    //         if (newTask.createdBy === userId || newTask.assignedTo.includes(userId)) {
-    //             toast.success('New task assigned to you!');
-    //         }
-    //     });
-
-    //     return () => {
-    //         socket.off('taskCreated');
-    //     };
-        
-    // }, [tasks]);
+  
 
 
     useEffect(() => {
         fetchTasks();
-    }, []);
+        socket.on('taskCreated', (newTask) => {
+            console.log('New task created:', newTask);
+            const userId = localStorage.getItem("userId");
+            if (newTask.createdBy === userId || newTask.assignedTo.includes(userId)) {
+                toast.success('New task assigned to you!');
+            }
+        });
+
+        return () => {
+            socket.off('taskCreated');
+        };
+    }, [tasks]);
 
     const fetchTasks = async () => {
         try {
