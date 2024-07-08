@@ -21,9 +21,7 @@ function Dashboard() {
         fetchTasks();
         setUpSocketListeners();
 
-        return () => {
-            cleanUpSocketListeners();
-        };
+        
     }, [tasks]);
 
     useEffect(() => {
