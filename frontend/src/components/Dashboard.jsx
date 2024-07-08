@@ -13,24 +13,29 @@ function Dashboard() {
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    // useEffect(() => {
+        
+    //         fetchTasks();
+
+
+    //     socket.on('taskCreated', (newTask) => {
+    //         console.log('New task created:', newTask);
+    //         const userId = localStorage.getItem("userId");
+    //         if (newTask.createdBy === userId || newTask.assignedTo.includes(userId)) {
+    //             toast.success('New task assigned to you!');
+    //         }
+    //     });
+
+    //     return () => {
+    //         socket.off('taskCreated');
+    //     };
+        
+    // }, [tasks]);
+
+
     useEffect(() => {
-        
-            fetchTasks();
-
-
-        socket.on('taskCreated', (newTask) => {
-            console.log('New task created:', newTask);
-            const userId = localStorage.getItem("userId");
-            if (newTask.createdBy === userId || newTask.assignedTo.includes(userId)) {
-                toast.success('New task assigned to you!');
-            }
-        });
-
-        return () => {
-            socket.off('taskCreated');
-        };
-        
-    }, [tasks]);
+        fetchTasks();
+    }, []);
 
     const fetchTasks = async () => {
         try {
@@ -52,28 +57,18 @@ function Dashboard() {
             const sortedTasks = sortTasksByPriority(response.data);
             setTasks(sortedTasks);
             setLoading(false);
-            
         } catch (error) {
             console.error("Error fetching tasks:", error);
             setLoading(false);
         }
     };
 
-    const sortTasksByPriority = (tasks) => {
-        const priorityOrder = {
-            High: 1,
-            Medium: 2,
-            Low: 3,
-        };
-        return tasks.slice().sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
-    };
-
     const handleSaveTask = (savedTask) => {
-        setTasks([...tasks, savedTask]);
+        const updatedTasks = [...tasks, savedTask];
+        const sortedTasks = sortTasksByPriority(updatedTasks);
+        setTasks(sortedTasks);
         setShowForm(false);
-        
         toast.success("Task added successfully!");
-        fetchTasks(); // Trigger task fetch after saving a task
     };
 
     const handleDeleteTask = async (taskId) => {
@@ -87,7 +82,7 @@ function Dashboard() {
                     },
                 }
             );
-            fetchTasks(); 
+            fetchTasks();
             toast.success("Task deleted successfully!");
         } catch (error) {
             console.error("Error deleting task:", error);
@@ -107,7 +102,7 @@ function Dashboard() {
                     },
                 }
             );
-            fetchTasks(); 
+            fetchTasks();
             toast.success("Priority changed successfully!");
         } catch (error) {
             console.error("Error changing priority:", error);
@@ -127,13 +122,25 @@ function Dashboard() {
                     },
                 }
             );
-            fetchTasks(); 
+            fetchTasks();
             toast.success("Status changed successfully!");
         } catch (error) {
             console.error("Error changing status:", error);
             toast.error("Failed to change status.");
         }
     };
+    
+
+    const sortTasksByPriority = (tasks) => {
+        const priorityOrder = {
+            High: 1,
+            Medium: 2,
+            Low: 3,
+        };
+        return tasks.slice().sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+    };
+
+    
 
     return (
         <div className="flex flex-col justify-center">
