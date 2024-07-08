@@ -12,21 +12,27 @@ function Dashboard() {
     const [tasks, setTasks] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [chnage, setchange] = useState(true);
+    const [shouldFetchTasks, setShouldFetchTasks] = useState(true);
 
     useEffect(() => {
-        fetchTasks();
-        console.log(socket.on('taskCreated'));
+        if (shouldFetchTasks) {
+            fetchTasks();
+        }
+
         socket.on('taskCreated', (newTask) => {
             console.log('New task created:', newTask);
-            toast.success('New task assigned to you!');
+            const userId = localStorage.getItem("userId");
+            if (newTask.createdBy === userId || newTask.assignedTo.includes(userId)) {
+                toast.success('New task assigned to you!');
+                setShouldFetchTasks(true); // Trigger task fetch when a new task is created
+            }
         });
 
         return () => {
             socket.off('taskCreated');
         };
         
-    }, [chnage]);
+    }, [shouldFetchTasks]);
 
     const fetchTasks = async () => {
         try {
@@ -48,7 +54,8 @@ function Dashboard() {
             const sortedTasks = sortTasksByPriority(response.data);
             setTasks(sortedTasks);
             setLoading(false);
-            // setchange((pre) => {!pre});
+            setShouldFetchTasks(false); // Reset the fetch trigger
+            
         } catch (error) {
             console.error("Error fetching tasks:", error);
             setLoading(false);
@@ -69,8 +76,8 @@ function Dashboard() {
         setTasks([...tasks, savedTask]);
         setShowForm(false);
         console.log(savedTask);
-        setchange(!chnage);
         toast.success("Task added successfully!");
+        setShouldFetchTasks(true); // Trigger task fetch after saving a task
     };
 
     const handleDeleteTask = async (taskId) => {
@@ -84,8 +91,7 @@ function Dashboard() {
                     },
                 }
             );
-            // fetchTasks();
-            setchange(!chnage);
+            setShouldFetchTasks(true); // Trigger task fetch after deleting a task
             toast.success("Task deleted successfully!");
         } catch (error) {
             console.error("Error deleting task:", error);
@@ -105,8 +111,7 @@ function Dashboard() {
                     },
                 }
             );
-            // fetchTasks();
-            setchange(!chnage);
+            setShouldFetchTasks(true); // Trigger task fetch after changing priority
             toast.success("Priority changed successfully!");
         } catch (error) {
             console.error("Error changing priority:", error);
@@ -126,8 +131,7 @@ function Dashboard() {
                     },
                 }
             );
-            // fetchTasks();
-            setchange(!chnage);
+            setShouldFetchTasks(true); // Trigger task fetch after changing status
             toast.success("Status changed successfully!");
         } catch (error) {
             console.error("Error changing status:", error);
