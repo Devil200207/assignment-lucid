@@ -4,10 +4,16 @@ const taskRoutes = require('./routes/tasks');
 const authRoutes = require('./routes/auth');
 const bodyParser = require('body-parser');
 const app = express();
-const http = require('http');
-const socketIo = require('socket.io');
+const http = require("http");
+const { Server } = require("socket.io");
 const server = http.createServer(app);
-const io = socketIo(server);
+
+const io = new Server(server, {
+    cors: {
+      origin: "https://assignment-lucid-1.onrender.com/",
+      methods: ["GET", "POST"],
+    },
+  });
 
 
 app.use(express.json());
