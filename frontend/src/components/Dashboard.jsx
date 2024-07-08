@@ -68,6 +68,7 @@ function Dashboard() {
 
             const sortedTasks = sortTasksByPriority(response.data);
             setTasks(sortedTasks);
+            setUpSocketListeners();
             setLoading(false);
         } catch (error) {
             console.error("Error fetching tasks:", error);
@@ -78,6 +79,7 @@ function Dashboard() {
     const handleSaveTask = (savedTask) => {
         const updatedTasks = [...tasks, savedTask];
         const sortedTasks = sortTasksByPriority(updatedTasks);
+        setUpSocketListeners();
         setTasks(sortedTasks);
         setShowForm(false);
         toast.success("Task added successfully!");
