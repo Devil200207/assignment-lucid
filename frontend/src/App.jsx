@@ -22,9 +22,9 @@ function App() {
       toast.success('New task assigned to you!');
     });
   
-    return () => {
-      newsocit.disconnect();
-    };
+    // return () => {
+    //   newsocit.disconnect();
+    // };
   }, []);
 
   return (

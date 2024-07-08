@@ -9,8 +9,8 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-      origin: "https://assignment-lucid-1.onrender.com",
-      methods: ["GET", "POST"],
+      origin: "*",
+      methods: ["GET", "POST","PUT","DELETE"],
     },
   });
 

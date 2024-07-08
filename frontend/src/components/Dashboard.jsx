@@ -12,6 +12,10 @@ function Dashboard() {
     const [tasks, setTasks] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [filteredTasks, setFilteredTasks] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+    const [priorityFilter, setPriorityFilter] = useState("");
 
     useEffect(() => {
         fetchTasks();
@@ -20,7 +24,11 @@ function Dashboard() {
         return () => {
             cleanUpSocketListeners();
         };
-    }, [socket]);
+    }, [tasks]);
+
+    useEffect(() => {
+        applyFilters();
+    }, [tasks,statusFilter, priorityFilter]);
 
     const setUpSocketListeners = () => {
         socket.on('taskCreated', (newTask) => {
@@ -154,6 +162,34 @@ function Dashboard() {
         return tasks.slice().sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
     };
 
+    const applyFilters = () => {
+        let filtered = [...tasks];
+
+        if (statusFilter) {
+            filtered = filtered.filter(task => task.status === statusFilter);
+        }
+
+        if (priorityFilter) {
+            filtered = filtered.filter(task => task.priority === priorityFilter);
+        }
+
+        setFilteredTasks(filtered);
+    };
+
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+        if (!query.trim()) {
+            setFilteredTasks(tasks); // Reset filtered tasks to all tasks when search query is empty
+            return;
+        }
+
+        const filtered = tasks.filter(task =>
+            task.name.toLowerCase().includes(query.toLowerCase()) ||
+            task.description.toLowerCase().includes(query.toLowerCase())
+        );
+        setFilteredTasks(filtered);
+    };
+
     
 
     return (
@@ -168,6 +204,37 @@ function Dashboard() {
                 >
                     Add Task
                 </button>
+            </div>
+            <div className="flex justify-center">
+                <input
+                    type="text"
+                    placeholder="Search tasks..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="px-4 py-2 mb-4 rounded-lg border bg-transparent text-white border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                />
+            </div>
+            <div className="flex justify-center space-x-4 mb-4">
+                <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="px-4 py-2 text-white bg-transparent rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                    <option className="bg-black" value="">All Statuses</option>
+                    <option className="bg-black" value="To Do">To Do</option>
+                    <option className="bg-black" value="In Progress">In Progress</option>
+                    <option className="bg-black" value="Done">Done</option>
+                </select>
+                <select
+                    value={priorityFilter}
+                    onChange={(e) => setPriorityFilter(e.target.value)}
+                    className="px-4 py-2 rounded-lg border text-white bg-transparent border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                    <option className="bg-black" value="">All Priorities</option>
+                    <option className="bg-black" value="Low">Low</option>
+                    <option className="bg-black" value="Medium">Medium</option>
+                    <option className="bg-black" value="High">High</option>
+                </select>
             </div>
             <AnimatePresence>
                 {showForm && (
@@ -186,8 +253,8 @@ function Dashboard() {
             ) : (
                 
                     <div className="grid p-4 grid-cols-1 gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-5 lg:gap-6">
-                        {tasks.length > 0 ? (
-                            tasks.map((task, index) =>
+                        {filteredTasks.length > 0 ? (
+                            filteredTasks.map((task, index) =>
                                 task ? (
                                     <div
                                         key={task._id || index}
