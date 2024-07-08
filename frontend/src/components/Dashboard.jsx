@@ -13,29 +13,23 @@ function Dashboard() {
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(true);
 
-  
-
-
     useEffect(() => {
         fetchTasks();
+        setUpSocketListeners();
+
+        return () => {
+            cleanUpSocketListeners();
+        };
+    }, []);
+
+    const setUpSocketListeners = () => {
         socket.on('taskCreated', (newTask) => {
             console.log('New task created:', newTask);
             const userId = localStorage.getItem("userId");
             if (newTask.createdBy === userId || newTask.assignedTo.includes(userId)) {
                 toast.success('New task assigned to you!');
+                setTasks(prevTasks => sortTasksByPriority([...prevTasks, newTask]));
             }
-        });
-
-        return () => {
-            socket.off('taskCreated');
-        };
-    }, []);
-    useEffect(() => {
-        // Set up socket event listeners
-        socket.on('taskCreated', (newTask) => {
-            // setTasks(prevTasks => [...prevTasks, newTask]);
-            fetchTasks();
-            toast.success('New task created!');
         });
 
         socket.on('taskUpdated', (updatedTask) => {
@@ -47,14 +41,13 @@ function Dashboard() {
             setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
             toast.success('Task deleted!');
         });
+    };
 
-        return () => {
-            // Clean up socket event listeners on component unmount
-            socket.off('taskCreated');
-            socket.off('taskUpdated');
-            socket.off('taskDeleted');
-        };
-    }, [tasks]); 
+    const cleanUpSocketListeners = () => {
+        socket.off('taskCreated');
+        socket.off('taskUpdated');
+        socket.off('taskDeleted');
+    };
 
     const fetchTasks = async () => {
         try {

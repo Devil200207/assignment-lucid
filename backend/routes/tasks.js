@@ -7,6 +7,15 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const {Task} = require("../batabase/db");
 
+
+io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+});
+
 //Create Task
 router.post('/saveTask', async (req, res) => {
 
@@ -23,15 +32,8 @@ router.post('/saveTask', async (req, res) => {
         name
         });
         // io.emit('taskCreated', task);
-        io.on('connection', (socket) => {
-            console.log('A user connected');
+        io.emit('taskCreated', task);
         
-            socket.on('createTask', (taskData) => {
-                // const newTask = createTask(taskData); // Function to create a task
-                // Emit to all clients or specific rooms
-                io.emit('taskCreated', task); // You can also use socket.to(room).emit() for specific users
-            });
-        });
         res.status(201).json(task);
     }
     catch{
@@ -62,6 +64,7 @@ router.put('/:id', async (req, res) => {
     try
     {
         const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        io.emit('taskUpdated', task);
         res.status(200).json(task);
     }
     catch
@@ -75,6 +78,7 @@ router.delete('/:id', async (req, res) => {
     try
     {
         await Task.findByIdAndDelete(req.params.id);
+        io.emit('taskDeleted', { taskId: req.params.id });
         res.status(204).send();
     }
     catch
