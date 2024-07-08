@@ -15,9 +15,9 @@ function Dashboard() {
     const [shouldFetchTasks, setShouldFetchTasks] = useState(true);
 
     useEffect(() => {
-        if (shouldFetchTasks) {
+        // if (shouldFetchTasks) {
             fetchTasks();
-        }
+        // }
 
         socket.on('taskCreated', (newTask) => {
             console.log('New task created:', newTask);
