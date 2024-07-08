@@ -54,7 +54,7 @@ function Dashboard() {
             const sortedTasks = sortTasksByPriority(response.data);
             setTasks(sortedTasks);
             setLoading(false);
-            setShouldFetchTasks(false); // Reset the fetch trigger
+            // setShouldFetchTasks(false); // Reset the fetch trigger
             
         } catch (error) {
             console.error("Error fetching tasks:", error);
