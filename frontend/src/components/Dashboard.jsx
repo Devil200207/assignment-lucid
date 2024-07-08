@@ -5,6 +5,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Meteors } from "./ui/meteors";
 import { AnimatePresence, motion } from "framer-motion";
+import io from 'socket.io-client';
+const socket = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
 
 function Dashboard() {
     const [tasks, setTasks] = useState([]);
@@ -13,6 +15,15 @@ function Dashboard() {
 
     useEffect(() => {
         fetchTasks();
+        socket.on('taskCreated', (newTask) => {
+            setTasks((prevTasks) => [...prevTasks, newTask]);
+            toast.success('New task assigned to you!');
+        });
+
+        return () => {
+            socket.off('taskCreated');
+        };
+        
     }, [tasks]);
 
     const fetchTasks = async () => {
@@ -32,12 +43,22 @@ function Dashboard() {
                 }
             );
 
-            setTasks(response.data);
+            const sortedTasks = sortTasksByPriority(response.data);
+            setTasks(sortedTasks);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching tasks:", error);
             setLoading(false);
         }
+    };
+
+    const sortTasksByPriority = (tasks) => {
+        const priorityOrder = {
+            High: 1,
+            Medium: 2,
+            Low: 3,
+        };
+        return tasks.slice().sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
     };
 
     const handleSaveTask = (savedTask) => {
@@ -135,14 +156,14 @@ function Dashboard() {
             {loading ? (
                 <p>Loading...</p>
             ) : (
-                <div className="flex justify-evenly flex-wrap">
-                    <div className="h-full w-full flex justify-evenly p-4">
+                
+                    <div className="grid p-4 grid-cols-5 gap-6">
                         {tasks.length > 0 ? (
                             tasks.map((task, index) =>
                                 task ? (
                                     <div
                                         key={task._id || index}
-                                        className="w-full relative max-w-xs mb-4"
+                                        className="relative mb-4"
                                     >
                                         <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-blue-500 to-teal-500 transform scale-[0.80] bg-red-500 rounded-full blur-3xl" />
                                         <div className="relative shadow-xl bg-gray-900 border border-gray-800 px-4 py-8 h-full overflow-hidden rounded-2xl flex flex-col justify-end items-start">
@@ -216,7 +237,7 @@ function Dashboard() {
                             <p>No tasks found.</p>
                         )}
                     </div>
-                </div>
+                
             )}
             <ToastContainer />
         </div>
