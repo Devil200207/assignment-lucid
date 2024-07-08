@@ -56,6 +56,7 @@ export const WavyBackground = ({
       w = ctx.canvas.width = window.innerWidth;
       h = ctx.canvas.height = window.innerHeight;
       ctx.filter = `blur(${blur}px)`;
+      render();
     };
     render();
   };
@@ -111,7 +112,7 @@ export const WavyBackground = ({
   return (
     <div
       className={cn(
-        "h-full flex flex-col ",
+        "h-full overflow-auto flex flex-col ",
         containerClassName
       )}
     >

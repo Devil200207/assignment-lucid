@@ -29,7 +29,31 @@ function Dashboard() {
         return () => {
             socket.off('taskCreated');
         };
-    }, [tasks]);
+    }, []);
+    useEffect(() => {
+        // Set up socket event listeners
+        socket.on('taskCreated', (newTask) => {
+            setTasks(prevTasks => [...prevTasks, newTask]);
+            toast.success('New task created!');
+        });
+
+        socket.on('taskUpdated', (updatedTask) => {
+            setTasks(prevTasks => prevTasks.map(task => task._id === updatedTask._id ? updatedTask : task));
+            toast.success('Task updated!');
+        });
+
+        socket.on('taskDeleted', ({ taskId }) => {
+            setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
+            toast.success('Task deleted!');
+        });
+
+        return () => {
+            // Clean up socket event listeners on component unmount
+            socket.off('taskCreated');
+            socket.off('taskUpdated');
+            socket.off('taskDeleted');
+        };
+    }, [tasks]); 
 
     const fetchTasks = async () => {
         try {
@@ -165,7 +189,7 @@ function Dashboard() {
                 <p>Loading...</p>
             ) : (
                 
-                    <div className="grid p-4 grid-cols-5 gap-6">
+                    <div className="grid p-4 grid-cols-1 gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-5 lg:gap-6">
                         {tasks.length > 0 ? (
                             tasks.map((task, index) =>
                                 task ? (
