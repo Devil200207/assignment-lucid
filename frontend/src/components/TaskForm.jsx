@@ -44,7 +44,7 @@ const TaskForm = ({ onSave, onClose }) => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            console.log('Task saved successfully:', response.data);
+            
             onSave(response.data);
             onClose(); // Close the form after saving
         } catch (error) {

@@ -1,20 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const app = express();
-const http = require('http');
-const socketIo = require('socket.io');
-const server = http.createServer(app);
-const io = socketIo(server);
+const http = require("http");
+const cors = require("cors");
+const { Server } = require("socket.io");
 const {Task} = require("../batabase/db");
+const server = http.createServer(app);
 
-
-io.on('connection', (socket) => {
-    console.log('A user connected');
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
-});
+const io = new Server(server, {
+    cors: {
+      origin: "https://assignment-lucid.onrender.com",
+      methods: ["GET", "POST"],
+    },
+  });
 
 //Create Task
 router.post('/saveTask', async (req, res) => {
