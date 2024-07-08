@@ -20,7 +20,7 @@ function Dashboard() {
         return () => {
             cleanUpSocketListeners();
         };
-    }, []);
+    }, [socket]);
 
     const setUpSocketListeners = () => {
         socket.on('taskCreated', (newTask) => {
