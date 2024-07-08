@@ -27,9 +27,9 @@ router.post('/saveTask', async (req, res) => {
             console.log('A user connected');
         
             socket.on('createTask', (taskData) => {
-                const newTask = createTask(taskData); // Function to create a task
+                // const newTask = createTask(taskData); // Function to create a task
                 // Emit to all clients or specific rooms
-                io.emit('taskCreated', newTask); // You can also use socket.to(room).emit() for specific users
+                io.emit('taskCreated', task); // You can also use socket.to(room).emit() for specific users
             });
         });
         res.status(201).json(task);
