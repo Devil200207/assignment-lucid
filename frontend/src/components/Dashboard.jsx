@@ -33,7 +33,8 @@ function Dashboard() {
     useEffect(() => {
         // Set up socket event listeners
         socket.on('taskCreated', (newTask) => {
-            setTasks(prevTasks => [...prevTasks, newTask]);
+            // setTasks(prevTasks => [...prevTasks, newTask]);
+            fetchTasks();
             toast.success('New task created!');
         });
 
