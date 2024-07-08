@@ -15,6 +15,7 @@ function Dashboard() {
 
     useEffect(() => {
         fetchTasks();
+        console.log(socket.on('taskCreated'));
         socket.on('taskCreated', (newTask) => {
             console.log('New task created:', newTask);
             toast.success('New task assigned to you!');
