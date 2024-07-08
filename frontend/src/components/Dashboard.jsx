@@ -69,7 +69,7 @@ function Dashboard() {
         setTasks([...tasks, savedTask]);
         setShowForm(false);
         console.log(savedTask);
-        setchange((pre) => {!pre});
+        setchange(!chnage);
         toast.success("Task added successfully!");
     };
 
@@ -85,7 +85,7 @@ function Dashboard() {
                 }
             );
             // fetchTasks();
-            setchange((pre) => {!pre});
+            setchange(!chnage);
             toast.success("Task deleted successfully!");
         } catch (error) {
             console.error("Error deleting task:", error);
@@ -106,7 +106,7 @@ function Dashboard() {
                 }
             );
             // fetchTasks();
-            setchange((pre) => {!pre});
+            setchange(!chnage);
             toast.success("Priority changed successfully!");
         } catch (error) {
             console.error("Error changing priority:", error);
