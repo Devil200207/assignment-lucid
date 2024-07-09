@@ -44,26 +44,9 @@ To deploy this project run
 
 ```bash
   git clone https://github.com/Devil200207/assignment-lucid.git
-  cd task-management-dashboard
+  cd assignment-lucid
 ```
 
-## For Client
-```bash
-  cd frontend
-  npm i
-```
-
-## Environment Variables
-Create a .env.local file in the root directory and add the following environment variables:
-
-```makefile
-  VITE_CLERK_PUBLISHABLE_KEY=your-clerk-publishable-key
-```
-
-## Start the Frontend Server
-```bash
-npm run dev
-```
 ## For Server
 ```bash
   cd backend
@@ -81,6 +64,42 @@ Add your mongodb cluster link in database/db.js
 ```bash
 npm run dev
 ```
+
+## For Client
+```bash
+  cd frontend
+  npm i
+```
+
+## Environment Variables
+Create a .env.local file in the root directory and add the following environment variables:
+
+```makefile
+  VITE_CLERK_PUBLISHABLE_KEY=your-clerk-publishable-key
+```
+
+## Update API Endpoint
+Ensure that your frontend code points to the local backend server for development. Update the API endpoint in your frontend code as follows:
+
+## Replace all:
+
+```javascript
+"https://assignment-lucid.onrender.com/";
+
+```
+
+## With 
+
+```javascript
+"http://localhost:3000/";
+
+```
+
+## Start the Frontend Server
+```bash
+npm run dev
+```
+
 # Usage
 ## Authentication
 The dashboard uses Clerk for authentication. Users need to sign up or log in to access the dashboard.
@@ -90,4 +109,4 @@ The dashboard uses Clerk for authentication. Users need to sign up or log in to 
 - **View Tasks:** Tasks are displayed in a grid format, sorted by priority. Users can see tasks assigned to them and tasks they have created.
 - **Update Task:** Change the priority and status of tasks using the dropdown menus.
 - **Delete Task:** Click the "Delete" button to remove a task.
-- **Search and Filters:** Use the search bar and filters to find tasks by name, description, tags, status, priority, due date, or collaborators.
+- **Search and Filters:** Use the search bar and filters to find tasks by name, description, status, priority, due date, or collaborators.
