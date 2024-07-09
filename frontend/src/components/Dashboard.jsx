@@ -16,6 +16,8 @@ function Dashboard() {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [priorityFilter, setPriorityFilter] = useState("");
+    const [dueDateFilter, setDueDateFilter] = useState("");
+    const [collaboratorFilter, setCollaboratorFilter] = useState("");
     const socket = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
     const { user } = useUser();
 
@@ -67,7 +69,7 @@ function Dashboard() {
 
     useEffect(() => {
         applyFilters();
-    }, [tasks,statusFilter, priorityFilter]);
+    }, [tasks, statusFilter, priorityFilter, dueDateFilter, collaboratorFilter]);
 
 
     const canEditTask = (task) => 
@@ -223,6 +225,39 @@ function Dashboard() {
         return tasks.slice().sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
     };
 
+    const isToday = (someDate) => {
+        const today = new Date();
+        const dateToCheck = new Date(someDate); // Ensure someDate is converted to Date object
+    
+        return (
+            dateToCheck.getDate() === today.getDate() &&
+            dateToCheck.getMonth() === today.getMonth() &&
+            dateToCheck.getFullYear() === today.getFullYear()
+        );
+    };
+    
+    // Utility function to check if a date is within the current week
+    const isThisWeek = (someDate) => {
+        const today = new Date();
+        const dateToCheck = new Date(someDate); // Ensure someDate is converted to Date object
+    
+        const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+        const weekEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 6);
+    
+        return dateToCheck >= weekStart && dateToCheck <= weekEnd;
+    };
+    
+    // Utility function to check if a date is within the next week
+    const isNextWeek = (someDate) => {
+        const today = new Date();
+        const dateToCheck = new Date(someDate); // Ensure someDate is converted to Date object
+    
+        const nextWeekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 7);
+        const nextWeekEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 13);
+    
+        return dateToCheck >= nextWeekStart && dateToCheck <= nextWeekEnd;
+    };
+
     const applyFilters = () => {
         let filtered = [...tasks];
 
@@ -232,6 +267,22 @@ function Dashboard() {
 
         if (priorityFilter) {
             filtered = filtered.filter(task => task.priority === priorityFilter);
+        }
+
+        if (dueDateFilter === "today") {
+            filtered = filtered.filter(task => isToday(task.dueDate)); // Implement isToday function
+        } else if (dueDateFilter === "thisWeek") {
+            filtered = filtered.filter(task => isThisWeek(task.dueDate)); // Implement isThisWeek function
+        } else if (dueDateFilter === "nextWeek") {
+            filtered = filtered.filter(task => isNextWeek(task.dueDate)); // Implement isNextWeek function
+        }
+console.log(collaboratorFilter)
+        if (collaboratorFilter === "creator") {
+            filtered = filtered.filter(task => task.roles == 'creator');
+        } else if (collaboratorFilter === "collaborator") {
+            filtered = filtered.filter(task => task.roles == 'collaborator');
+        } else if (collaboratorFilter === "viewer") {
+            filtered = filtered.filter(task => task.roles == 'viewer');
         }
 
         setFilteredTasks(filtered);
@@ -295,6 +346,27 @@ function Dashboard() {
                     <option className="bg-black" value="Low">Low</option>
                     <option className="bg-black" value="Medium">Medium</option>
                     <option className="bg-black" value="High">High</option>
+                </select>
+                <select
+                    value={dueDateFilter}
+                    onChange={(e) => setDueDateFilter(e.target.value)}
+                    className="px-4 py-2 text-white bg-transparent rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                    <option className="bg-black" value="">All Due Dates</option>
+                    <option className="bg-black" value="today">Today</option>
+                    <option className="bg-black" value="thisWeek">This Week</option>
+                    <option className="bg-black" value="nextWeek">Next Week</option>
+                    {/* Add more options as per your need */}
+                </select>
+                <select
+                    value={collaboratorFilter}
+                    onChange={(e) => setCollaboratorFilter(e.target.value)}
+                    className="px-4 py-2 text-white bg-transparent rounded-lg border border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                   <option className="bg-black" value="">All collaboration</option>
+                    <option className="bg-black" value="creator">Creator</option>
+                    <option className="bg-black" value="collaborator">Collaborator</option>
+                    <option className="bg-black" value="viewer">Viewer</option>
                 </select>
             </div>
             <AnimatePresence>

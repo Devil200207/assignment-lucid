@@ -13,7 +13,7 @@ const TaskForm = ({ onSave, onClose }) => {
     const [status, setStatus] = useState('To Do');
     const [assignedTo, setAssignedTo] = useState([]);
     const [users, setUsers] = useState([]);
-    const [roles, setRoles] = useState('Viewer');
+    const [roles, setRoles] = useState('creator');
     useEffect(() => {
         const fetchUsers = async () => {
             try {
