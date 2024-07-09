@@ -112,7 +112,7 @@ export const WavyBackground = ({
   return (
     <div
       className={cn(
-        "h-full overflow-auto flex flex-col ",
+        "h-screen overflow-auto flex flex-col ",
         containerClassName
       )}
     >

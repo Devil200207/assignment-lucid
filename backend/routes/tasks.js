@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const {Task} = require("../batabase/db");
 
-
-
 //Create Task
 router.post('/saveTask', async (req, res) => {
 
@@ -19,8 +17,6 @@ router.post('/saveTask', async (req, res) => {
         description,
         name
         });
-        // io.emit('taskCreated', task);
-       
         
         res.status(201).json(task);
     }
@@ -32,13 +28,13 @@ router.post('/saveTask', async (req, res) => {
 // Get tasks
 router.get('/', async (req, res) => {
     try {
-        const userId = req.query.userId; // Assuming you send userId as a query parameter
+        const userId = req.query.userId;
         const tasks = await Task.find({
             $or: [
                 { createdBy: userId },
                 { assignedTo: userId }
             ]
-        }).populate('assignedTo', 'username'); // Populate assignedTo with username from User model
+        }).populate('assignedTo', 'username');
 
         res.status(200).json(tasks);
     } catch (error) {
@@ -52,7 +48,6 @@ router.put('/:id', async (req, res) => {
     try
     {
         const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        // io.emit('taskUpdated', task);
         res.status(200).json(task);
     }
     catch
@@ -61,12 +56,10 @@ router.put('/:id', async (req, res) => {
     }
 });
   
-// Delete task
 router.delete('/:id', async (req, res) => {
     try
     {
         await Task.findByIdAndDelete(req.params.id);
-        // io.emit('taskDeleted', { taskId: req.params.id });
         res.status(204).send();
     }
     catch

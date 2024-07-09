@@ -22,35 +22,30 @@ app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// io.on('connection', (socket) => {
-//     console.log('New client connected');
-//     socket.on('disconnect', () => {
-//       console.log('Client disconnected');
-//     });
-// });
-
-const users = [];
-
 io.on("connection", (socket) => {
-    // console.log(`User connected with ${socket.id}`);
-
-    // socket.broadcast.emit('hi',"how are you");
-
     
-
     socket.on("join_room", (data) => {
       socket.join(data);
       console.log(`User with id ${socket.id} joined room : ${data}`);
     });
 
     socket.on('assignTask', ({ task, toUserId, fromUserId }) => {
-      // Send task to the assigned user
-      console.log(task, toUserId, fromUserId);
-      // socket.join(toUserId);
       socket.to(fromUserId).emit('assignTask', task);
-  
-      // Re-join the sender's room
-      // socket.join(fromUserId);
+    });
+
+    socket.on('deleteTask', ({ toUserId, fromUserId }) => {
+      socket.to(toUserId).emit('deleteTask', fromUserId);
+      socket.to(fromUserId).emit('deleteTask', toUserId);
+    });
+
+    socket.on('periorityChange', ({ toUserId, fromUserId }) => {
+      socket.to(toUserId).emit('periorityChange', fromUserId);
+      socket.to(fromUserId).emit('periorityChange', toUserId);
+    });
+
+    socket.on('statusChange', ({ toUserId, fromUserId }) => {
+      socket.to(toUserId).emit('statusChange', fromUserId);
+      socket.to(fromUserId).emit('statusChange', toUserId);
     });
 
 });

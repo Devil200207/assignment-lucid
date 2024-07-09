@@ -7,7 +7,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { Meteors } from "./ui/meteors";
 import { AnimatePresence, motion } from "framer-motion";
 import io from 'socket.io-client';
-// const socket = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
 
 function Dashboard() {
     const [tasks, setTasks] = useState([]);
@@ -17,93 +16,66 @@ function Dashboard() {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [priorityFilter, setPriorityFilter] = useState("");
-    // const [socket, setSocket] = useState(null);
-    const socket = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
+    // const socket = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
+    const socket = io('http://localhost:3000', {transports: ['websocket', 'polling', 'flashsocket']});
     const { user } = useUser();
 
   useEffect(() => {
-    // const newsocit = io('http://localhost:3000', {transports: ['websocket', 'polling', 'flashsocket']});
 
   if(socket)
   {
-    let userId = localStorage.getItem("userId");
-    if(!userId)
-    {
-        localStorage.setItem("userId",user.id);
-        userId = localStorage.getItem("userId"); 
+        let userId = localStorage.getItem("userId");
+        if(!userId)
+        {
+            localStorage.setItem("userId",user.id);
+            userId = localStorage.getItem("userId"); 
+        }
+    
+        socket.on('connect', () => {
+            socket.emit('join_room',userId)
+        });
+
+        socket.on('assignTask', (task) => {
+            console.log(task);
+            fetchTasks();
+            toast.success("New Task asigned to you");
+        });
+        socket.on('deleteTask', (task) => {
+            console.log(task);
+            fetchTasks();
+            toast.success("your task is deleted successfully!");
+        });
+
+        socket.on('periorityChange', (task) => {
+            console.log(task);
+            fetchTasks();
+            toast.success("your task status changed successfully!");
+        });
+
+        socket.on('statusChange', (task) => {
+            console.log(task);
+            fetchTasks();
+            toast.success("your task status changed successfully!");
+        });
+    
     }
-    
-    console.log(userId);
-    // setSocket(newsocit);
-    socket.on('connect', () => {
-        socket.emit('join_room',userId)
-    });
-
-    
-
-    // newsocit.on('hi', (data) => {
-        socket.emit('gg',"testing")
-    // });
-
-    socket.on('assignTask', (task) => {
-        console.log(task);
-        setTasks((prevTasks) => [...prevTasks, task]);
-        alert(`New task assigned: ${task.name}`);
-    });
-  
-  }
-    // return () => {
-    //     socket.disconnect();
-    // };
-  }, [showForm]);
+    // fetchTasks(); 
+    }, []);
 
     useEffect(() => {
-        fetchTasks();
-        // setUpSocketListeners();
-
-        const userId = localStorage.getItem("userId");
-
-        
+        fetchTasks();        
     }, []);
 
     useEffect(() => {
         applyFilters();
-    }, [statusFilter, priorityFilter]);
+    }, [tasks,statusFilter, priorityFilter]);
 
-    // const setUpSocketListeners = () => {
-    //     console.log("hiii")
-    //     socket.on('taskCreated', (newTask) => {
-    //         console.log('New task created:', newTask);
-    //         const userId = localStorage.getItem("userId");
-    //         if (newTask.createdBy === userId || newTask.assignedTo.includes(userId)) {
-    //             toast.success('New task assigned to you!');
-    //             setTasks(prevTasks => sortTasksByPriority([...prevTasks, newTask]));
-    //         }
-    //     });
-
-    //     socket.on('taskUpdated', (updatedTask) => {
-    //         setTasks(prevTasks => prevTasks.map(task => task._id === updatedTask._id ? updatedTask : task));
-    //         toast.success('Task updated!');
-    //     });
-
-    //     socket.on('taskDeleted', ({ taskId }) => {
-    //         setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
-    //         toast.success('Task deleted!');
-    //     });
-    // };
-
-    // const cleanUpSocketListeners = () => {
-    //     socket.off('taskCreated');
-    //     socket.off('taskUpdated');
-    //     socket.off('taskDeleted');
-    // };
+   
 
     const fetchTasks = async () => {
         try {
             const token = localStorage.getItem("token");
             const userId = localStorage.getItem("userId");
-
-            // console.log( socket.on('taskCreated'));
 
             const response = await axios.get(
                 "https://assignment-lucid.onrender.com/api/tasks",
@@ -118,8 +90,7 @@ function Dashboard() {
             );
 
             const sortedTasks = sortTasksByPriority(response.data);
-            setTasks(sortedTasks);
-            // setUpSocketListeners();
+            setTasks(sortedTasks);;
             setLoading(false);
         } catch (error) {
             console.error("Error fetching tasks:", error);
@@ -128,32 +99,39 @@ function Dashboard() {
     };
 
     const handleSaveTask = (savedTask) => {
-        console.log(savedTask);
-        socket.emit('join_room',savedTask.assignedTo[0]);
-        socket.emit('assignTask',{task:savedTask,toUserId:savedTask.createdBy,fromUserId:savedTask.assignedTo[0]})
-        
-        const updatedTasks = [...tasks, savedTask];
-        const sortedTasks = sortTasksByPriority(updatedTasks);
-        // setUpSocketListeners();
-        setTasks(sortedTasks);
+
+        if(savedTask.createdBy != savedTask.assignedTo[0])
+        {
+            socket.emit('join_room',savedTask.assignedTo[0]);
+            socket.emit('assignTask',{task:savedTask,toUserId:savedTask.createdBy,fromUserId:savedTask.assignedTo[0]})
+        }
+        fetchTasks();
         setShowForm(false);
         toast.success("Task added successfully!");
 
         socket.emit('join_room',savedTask.createdBy);
     };
 
-    const handleDeleteTask = async (taskId) => {
+    const handleDeleteTask = async (task) => {
         try {
             const token = localStorage.getItem("token");
             await axios.delete(
-                `https://assignment-lucid.onrender.com/api/tasks/${taskId}`,
+                `https://assignment-lucid.onrender.com/api/tasks/${task._id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 }
             );
+
+            if(task.createdBy != task.assignedTo[0])
+            {
+                socket.emit('join_room',task.assignedTo[0]);
+                socket.emit('deleteTask',{toUserId:task.createdBy,fromUserId:task.assignedTo[0]})
+            }
             fetchTasks();
+            setShowForm(false);       
+            socket.emit('join_room',task.createdBy);
             toast.success("Task deleted successfully!");
         } catch (error) {
             console.error("Error deleting task:", error);
@@ -161,7 +139,7 @@ function Dashboard() {
         }
     };
 
-    const handleChangePriority = async (taskId, newPriority) => {
+    const handleChangePriority = async (task,taskId, newPriority) => {
         try {
             const token = localStorage.getItem("token");
             await axios.put(
@@ -173,7 +151,16 @@ function Dashboard() {
                     },
                 }
             );
+           
+            if(task.createdBy != task.assignedTo[0])
+            {
+                socket.emit('join_room',task.assignedTo[0]);
+                socket.emit('periorityChange',{toUserId:task.createdBy,fromUserId:task.assignedTo[0]})
+            }
+
             fetchTasks();
+            setShowForm(false);       
+            socket.emit('join_room',task.createdBy);
             toast.success("Priority changed successfully!");
         } catch (error) {
             console.error("Error changing priority:", error);
@@ -181,7 +168,7 @@ function Dashboard() {
         }
     };
 
-    const handleChangeStatus = async (taskId, newStatus) => {
+    const handleChangeStatus = async (task,taskId, newStatus) => {
         try {
             const token = localStorage.getItem("token");
             await axios.put(
@@ -193,7 +180,16 @@ function Dashboard() {
                     },
                 }
             );
+            
+            if(task.createdBy != task.assignedTo[0])
+            {
+                socket.emit('join_room',task.assignedTo[0]);
+                socket.emit('statusChange',{toUserId:task.createdBy,fromUserId:task.assignedTo[0]})
+            }
+    
             fetchTasks();
+            setShowForm(false);       
+            socket.emit('join_room',task.createdBy);
             toast.success("Status changed successfully!");
         } catch (error) {
             console.error("Error changing status:", error);
@@ -298,7 +294,7 @@ function Dashboard() {
                 )}
             </AnimatePresence>
             {loading ? (
-                <p>Loading...</p>
+                <p className="text-white text-2xl">Loading...</p>
             ) : (
                 
                     <div className="grid p-4 grid-cols-1 gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-5 lg:gap-6">
@@ -340,7 +336,7 @@ function Dashboard() {
                                                     <select className="bg-gray-900 border ml-6 border-slate-700"
                                                         value={task.priority}
                                                         onChange={(e) =>
-                                                            handleChangePriority(task._id, e.target.value)
+                                                            handleChangePriority(task,task._id, e.target.value)
                                                         }
                                                     >
                                                         <option value="Low">Low</option>
@@ -353,7 +349,7 @@ function Dashboard() {
                                                     <select className="bg-gray-900 border ml-6 border-slate-700 "
                                                         value={task.status}
                                                         onChange={(e) =>
-                                                            handleChangeStatus(task._id, e.target.value)
+                                                            handleChangeStatus(task,task._id, e.target.value)
                                                         }
                                                     >
                                                         <option value="To Do">To Do</option>
@@ -364,7 +360,7 @@ function Dashboard() {
                                             </div>
                                             <div className="flex items-center justify-center pt-4">
                                                 <button
-                                                    onClick={() => handleDeleteTask(task._id)}
+                                                    onClick={() => handleDeleteTask(task)}
                                                     className="inline-flex cursor-pointer h-12 animate-shimmer items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-slate-400 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
                                                 >
                                                     Delete
@@ -378,7 +374,7 @@ function Dashboard() {
                                 )
                             )
                         ) : (
-                            <p>No tasks found.</p>
+                            <p className="text-white text-2xl">No tasks added yet!!.</p>
                         )}
                     </div>
                 
