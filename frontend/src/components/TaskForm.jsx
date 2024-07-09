@@ -13,7 +13,7 @@ const TaskForm = ({ onSave, onClose }) => {
     const [status, setStatus] = useState('To Do');
     const [assignedTo, setAssignedTo] = useState([]);
     const [users, setUsers] = useState([]);
-
+    const [roles, setRoles] = useState('Viewer');
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -31,14 +31,16 @@ const TaskForm = ({ onSave, onClose }) => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
+            const assignedUsers = assignedTo.length === 0 ? [createdBy] : assignedTo;
             const response = await axios.post('https://assignment-lucid.onrender.com/api/tasks/saveTask', {
                 name,
                 description,
                 dueDate,
                 priority,
                 status,
-                assignedTo,
-                createdBy
+                assignedTo: assignedUsers,
+                createdBy,
+                roles
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -51,6 +53,11 @@ const TaskForm = ({ onSave, onClose }) => {
             console.error('Error saving task:', error);
         }
     };
+
+    const handleRoleChange = (userId, newRole) => {
+        setRoles(newRole);
+    };
+    
 
     return (
         <motion.div
@@ -126,6 +133,24 @@ const TaskForm = ({ onSave, onClose }) => {
                             <option key={user.userId} value={user.userId}>{user.username}</option>
                         ))}
                     </select>
+                </div>
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-300" htmlFor="roles">Role</label>
+                    {assignedTo.map(userId => (
+                        <div key={userId} className="flex items-center space-x-4 mb-2">
+                            <span className="text-white">{users.find(user => user.userId === userId)?.username}</span>
+                            <select
+                            className="mt-1 p-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                            value={roles.role}
+                            onChange={(e) => handleRoleChange(userId, e.target.value)}
+                            disabled={userId === createdBy}
+                        >
+                            <option value="creator">Creator</option>
+                            <option value="collaborator">Collaborator</option>
+                            <option value="viewer">Viewer</option>
+                        </select>
+                        </div>
+                    ))}
                 </div>
                 <div className="flex justify-end">
                     <button

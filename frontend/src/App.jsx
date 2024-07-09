@@ -8,18 +8,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  // const [socket, setSocket] = useState(null);
-  // useEffect(() => {
-  //   const newsocit = io('http://localhost:3000', {transports: ['websocket', 'polling', 'flashsocket']});
-
-  
-
-  //   setSocket(newsocit);
-  //   newsocit.on('connect', () => {
-  //     console.log('Connected to server');
-  //   });
-
-  // }, []);
 
   return (
    <div>

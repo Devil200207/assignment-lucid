@@ -5,7 +5,7 @@ const {Task} = require("../batabase/db");
 //Create Task
 router.post('/saveTask', async (req, res) => {
 
-    const{status,priority,dueDate,createdBy,assignedTo,description,name} = req.body;
+    const{status,priority,dueDate,createdBy,assignedTo,description,name,roles } = req.body;
     try
     {
         const task = await Task.create({
@@ -15,7 +15,8 @@ router.post('/saveTask', async (req, res) => {
         priority,
         dueDate,
         description,
-        name
+        name,
+        roles
         });
         
         res.status(201).json(task);

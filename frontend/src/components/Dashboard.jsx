@@ -16,8 +16,7 @@ function Dashboard() {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [priorityFilter, setPriorityFilter] = useState("");
-    // const socket = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
-    const socket = io('http://localhost:3000', {transports: ['websocket', 'polling', 'flashsocket']});
+    const socket = io('https://assignment-lucid.onrender.com', {transports: ['websocket', 'polling', 'flashsocket']});
     const { user } = useUser();
 
   useEffect(() => {
@@ -70,6 +69,11 @@ function Dashboard() {
         applyFilters();
     }, [tasks,statusFilter, priorityFilter]);
 
+
+    const canEditTask = (task) => 
+    {
+        return task.createdBy === user.id || task.createdBy === task.assignedTo[0] || task.roles !== 'viewer';
+    };
    
 
     const fetchTasks = async () => {
@@ -113,6 +117,10 @@ function Dashboard() {
     };
 
     const handleDeleteTask = async (task) => {
+        if (!canEditTask(task)) {
+            toast.error("You do not have permission to delete this task.");
+            return;
+        }
         try {
             const token = localStorage.getItem("token");
             await axios.delete(
@@ -140,6 +148,10 @@ function Dashboard() {
     };
 
     const handleChangePriority = async (task,taskId, newPriority) => {
+        if (!canEditTask(task)) {
+            toast.error("You do not have permission to change the priority of this task.");
+            return;
+        }
         try {
             const token = localStorage.getItem("token");
             await axios.put(
@@ -169,6 +181,10 @@ function Dashboard() {
     };
 
     const handleChangeStatus = async (task,taskId, newStatus) => {
+        if (!canEditTask(task)) {
+            toast.error("You do not have permission to change the status of this task.");
+            return;
+        }
         try {
             const token = localStorage.getItem("token");
             await axios.put(

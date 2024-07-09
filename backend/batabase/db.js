@@ -25,8 +25,9 @@ const TaskSchema = new mongoose.Schema({
     dueDate: { type: Date },
     priority: { type: String },
     status: { type: String },
-    createdBy: { type: String, required: true }, // Change to type String
-    assignedTo: [{ type: String }], // Change to type String
+    createdBy: { type: String, required: true },
+    assignedTo: [{ type: String }],
+    roles: { type: String },
 });
 
 const User = mongoose.model("users",UserSchem);
